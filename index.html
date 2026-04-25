@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandeep Alluru — 10 Claude Code commands for solo SaaS devs</title>
+  <meta name="description" content="Free pack: 10 Claude Code commands every solo SaaS dev should have. Plus weekly build-in-public updates from Sandeep Alluru.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://salluru.dev">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://salluru.dev">
+  <meta property="og:title" content="Sandeep Alluru — 10 Claude Code commands for solo SaaS devs">
+  <meta property="og:description" content="Free pack: 10 Claude Code commands every solo SaaS dev should have. Plus weekly build-in-public updates from Sandeep Alluru.">
+  <meta property="og:image" content="https://salluru.dev/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@sandeep_alluru">
+  <meta name="twitter:title" content="Sandeep Alluru — 10 Claude Code commands for solo SaaS devs">
+  <meta name="twitter:description" content="Free pack: 10 Claude Code commands every solo SaaS dev should have. Plus weekly build-in-public updates from Sandeep Alluru.">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark">
+
+  <!-- Skip to content -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- Hidden iframe for form submission -->
+  <iframe name="form-target" id="form-target" style="display:none;" title="Form submission target" aria-hidden="true"></iframe>
+
+  <!-- TOP BAR -->
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <span class="topbar-name">Sandeep Alluru</span>
+        <span class="topbar-tagline">Solo dev shipping AI SaaS</span>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" type="button">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main-content">
+
+    <!-- HERO SECTION -->
+    <section class="hero" aria-label="Hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-inner">
+
+        <div class="hero-content">
+          <p class="eyebrow">FREE — FOR SOLO SAAS DEVS</p>
+          <h1 class="hero-headline">10 Claude Code commands every solo SaaS dev should have</h1>
+          <h2 class="hero-sub">The exact commands I use to ship AI side projects on nights and weekends. No fluff. Copy, paste, ship.</h2>
+
+          <form class="email-form" id="hero-form" action="https://sandeepalluru.beehiiv.com/subscribe" method="POST" target="form-target" novalidate>
+            <div class="form-row">
+              <label for="hero-email" class="sr-only">Email address</label>
+              <input
+                type="email"
+                id="hero-email"
+                name="email"
+                class="email-input"
+                placeholder="you@example.com"
+                required
+                autocomplete="email"
+                aria-required="true"
+              >
+              <button type="submit" class="btn-primary">Get the commands</button>
+            </div>
+            <p class="form-disclaimer">Plus weekly build-in-public updates. Unsubscribe anytime.</p>
+            <div class="form-message" id="hero-form-message" role="alert" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="hero-terminal" aria-hidden="true">
+          <div class="terminal-window">
+            <div class="terminal-titlebar">
+              <div class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <span class="terminal-title">claude — salluru.dev</span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <!-- JS fills this in -->
+              <noscript>
+                <div class="terminal-line"><span class="terminal-prompt">$</span> <span>claude</span></div>
+                <div class="terminal-line"><span class="terminal-prompt">&gt;</span> /scaffold-saas-app</div>
+                <div class="terminal-line terminal-success">✓ Next.js + Tailwind + Clerk + Convex</div>
+                <div class="terminal-line"><span class="terminal-prompt">&gt;</span> /auth-flow</div>
+                <div class="terminal-line terminal-success">✓ Sign-in, sign-up, reset, sessions</div>
+                <div class="terminal-line"><span class="terminal-prompt">&gt;</span> /billing-stripe</div>
+                <div class="terminal-line terminal-success">✓ Subscriptions + webhooks + portal</div>
+                <div class="terminal-line"><span class="terminal-prompt">&gt;</span> /deploy-prod</div>
+                <div class="terminal-line terminal-success">✓ Live at salluru.dev — done in 8m 23s</div>
+              </noscript>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SOCIAL PROOF STRIP -->
+    <section class="social-strip" aria-label="Building in public on">
+      <div class="container social-strip-inner">
+        <span class="social-strip-label">Building in public on:</span>
+        <div class="social-links">
+
+          <a href="https://youtube.com/@sandeepalluru" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Sandeep Alluru on YouTube">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.09 0 12 0 12s0 3.91.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.91 24 12 24 12s0-3.91-.5-5.81zM9.75 15.52V8.48L15.86 12l-6.11 3.52z"/>
+            </svg>
+            <span>YouTube</span>
+          </a>
+
+          <a href="https://tiktok.com/@salluru" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Sandeep Alluru on TikTok">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.02-.06z"/>
+            </svg>
+            <span>TikTok</span>
+          </a>
+
+          <a href="https://x.com/sandeep_alluru" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Sandeep Alluru on X (Twitter)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            <span>X</span>
+          </a>
+
+          <a href="https://instagram.com/sandeepallurudev" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Sandeep Alluru on Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            <span>Instagram</span>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT'S INSIDE -->
+    <section class="whats-inside" aria-labelledby="inside-heading">
+      <div class="container">
+        <h2 id="inside-heading" class="section-headline">What's in the pack</h2>
+        <p class="section-sub">10 commands. Each saves 30+ minutes the first time you use it.</p>
+
+        <div class="commands-grid">
+
+          <div class="command-card">
+            <div class="command-name">/scaffold-saas</div>
+            <div class="command-desc">Spin up Next.js + Tailwind + Clerk + Convex in one command</div>
+          </div>
+
+          <div class="command-card">
+            <div class="command-name">/auth-flow</div>
+            <div class="command-desc">Sign-in, sign-up, password reset, all wired</div>
+          </div>
+
+          <div class="command-card">
+            <div class="command-name">/billing-stripe</div>
+            <div class="command-desc">Subscriptions, webhooks, customer portal</div>
+          </div>
+
+          <div class="command-card">
+            <div class="command-name">/landing-page</div>
+            <div class="command-desc">Hero + pricing + FAQ in your brand colors</div>
+          </div>
+
+          <div class="command-card">
+            <div class="command-name">/seed-data</div>
+            <div class="command-desc">Realistic demo data for any schema</div>
+          </div>
+
+          <div class="command-card">
+            <div class="command-name">/deploy-prod</div>
+            <div class="command-desc">One command from local to production on Netlify</div>
+          </div>
+
+        </div>
+
+        <p class="commands-more">Plus 4 more inside &rarr;</p>
+      </div>
+    </section>
+
+    <!-- WHO IT'S FOR -->
+    <section class="who-for" aria-labelledby="who-heading">
+      <div class="container who-for-inner">
+        <h2 id="who-heading" class="section-headline">Built for the 5-hours-a-week founder</h2>
+        <div class="who-for-text">
+          <p>You have a day job. You want to ship a side project. Every weekend you open a new repo and spend 4 hours just setting up auth, billing, and deployment. By the time the boring stuff works, you're out of weekend energy for the actual product.</p>
+          <p>These 10 Claude Code commands skip all of that. Run <code>/scaffold-saas</code> — you have auth, database, billing, and a deployable app in under 10 minutes. Then you spend the rest of your weekend on the part that actually matters: the thing your customers will pay for.</p>
+          <p>I built this pack because I needed it. I'm shipping AI SaaS side projects with these commands and posting the numbers publicly. Subscribe and watch the playbook unfold in real time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT STRIP -->
+    <section class="about-strip" aria-labelledby="about-heading">
+      <div class="container about-inner">
+        <div class="about-photo">
+          <div class="photo-placeholder" role="img" aria-label="Photo of Sandeep Alluru — coming soon">Photo coming</div>
+        </div>
+        <div class="about-text">
+          <h2 id="about-heading">Hi, I'm Sandeep</h2>
+          <p>Solo dev with a day job, building 3 AI SaaS products in 90 days and sharing every step of the journey — the wins, the failures, and the exact tools I use.</p>
+          <p>I post the real numbers: revenue, signups, churn, hours spent. No vanity metrics.</p>
+          <p>Drop your email above and I'll send the commands today.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta" aria-labelledby="cta-heading">
+      <div class="container final-cta-inner">
+        <h2 id="cta-heading" class="cta-headline">Get the commands</h2>
+
+        <form class="email-form" id="cta-form" action="https://sandeepalluru.beehiiv.com/subscribe" method="POST" target="form-target" novalidate>
+          <div class="form-row">
+            <label for="cta-email" class="sr-only">Email address</label>
+            <input
+              type="email"
+              id="cta-email"
+              name="email"
+              class="email-input"
+              placeholder="you@example.com"
+              required
+              autocomplete="email"
+              aria-required="true"
+            >
+            <button type="submit" class="btn-primary">Get the commands</button>
+          </div>
+          <p class="form-disclaimer">10 commands. One PDF. Free forever.</p>
+          <div class="form-message" id="cta-form-message" role="alert" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+
+      <div class="footer-col">
+        <div class="footer-brand">Sandeep Alluru</div>
+        <p class="footer-tagline">Shipping AI SaaS side projects, solo.</p>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Find me on</div>
+        <ul class="footer-links">
+          <li><a href="https://youtube.com/@sandeepalluru" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          <li><a href="https://tiktok.com/@salluru" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+          <li><a href="https://x.com/sandeep_alluru" target="_blank" rel="noopener noreferrer">X</a></li>
+          <li><a href="https://instagram.com/sandeepallurudev" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+          <li><a href="https://threads.net/@sandeepallurudev" target="_blank" rel="noopener noreferrer">Threads</a></li>
+          <li><a href="https://facebook.com/sandeepallurudev" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Newsletter</div>
+        <a href="https://sandeepalluru.beehiiv.com" target="_blank" rel="noopener noreferrer" class="footer-newsletter-link">sandeepalluru.beehiiv.com</a>
+        <p class="footer-newsletter-desc">Weekly build-in-public updates.</p>
+      </div>
+
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>&copy; 2026 Sandeep Alluru</span>
+        <span class="footer-sep">&bull;</span>
+        <span>Built with Claude Code in 2 hours</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
