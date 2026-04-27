@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whale Flow — April 2026 Backtest</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --green: #3fb950;
+  --green-dim: #1a3a24;
+  --red: #f85149;
+  --red-dim: #3a1a1a;
+  --blue: #58a6ff;
+  --yellow: #d29922;
+  --purple: #bc8cff;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+a { color: var(--blue); text-decoration: none; }
+
+/* Layout */
+.header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+.header h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+.header .sub { color: var(--muted); font-size: 12px; }
+.badge { background: var(--blue); color: #000; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+.main { max-width: 1600px; margin: 0 auto; padding: 20px 24px; }
+
+/* Stat cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.card .value { font-size: 24px; font-weight: 700; }
+.card .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.blue { color: var(--blue); }
+.yellow { color: var(--yellow); }
+.purple { color: var(--purple); }
+
+/* Charts */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.chart-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.chart-box h3 { font-size: 13px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.chart-box canvas { max-height: 240px; }
+
+/* Filters */
+.filters { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters label { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+.filters select, .filters input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-family: inherit; font-size: 12px; cursor: pointer; }
+.filters select:focus, .filters input:focus { outline: 1px solid var(--blue); }
+.filter-group { display: flex; align-items: center; gap: 6px; }
+.btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; transition: background 0.15s; }
+.btn:hover { background: var(--border); }
+.btn.active { background: var(--blue); color: #000; border-color: var(--blue); }
+
+/* Table */
+.table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.table-header h3 { font-size: 13px; }
+.count-badge { background: var(--bg3); border: 1px solid var(--border); padding: 3px 10px; border-radius: 12px; font-size: 11px; color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: var(--bg3); padding: 8px 10px; text-align: left; color: var(--muted); font-weight: 600; white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; position: sticky; top: 0; z-index: 1; }
+th:hover { color: var(--text); }
+th.sort-asc::after { content: ' ↑'; }
+th.sort-desc::after { content: ' ↓'; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg3); }
+.win-row td:first-child { border-left: 2px solid var(--green); }
+.lose-row td:first-child { border-left: 2px solid var(--red); }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.tag-win { background: var(--green-dim); color: var(--green); }
+.tag-lose { background: var(--red-dim); color: var(--red); }
+.tag-sweep { background: #1a2a3a; color: var(--blue); }
+.tag-call { background: #1a2a1a; color: #7ee787; }
+.tag-put { background: #2a1a1a; color: #ffa198; }
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); justify-content: flex-end; }
+.page-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 12px; }
+.page-btn:disabled { opacity: 0.3; cursor: default; }
+.page-info { color: var(--muted); font-size: 12px; }
+
+/* Patterns section */
+.section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.patterns-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.pattern-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.pattern-card h4 { font-size: 11px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px; }
+.pattern-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.pattern-row:last-child { border-bottom: none; }
+.pattern-val { font-size: 12px; color: var(--text); flex: 1; }
+.pattern-bar-wrap { flex: 1; margin: 0 10px; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.pattern-bar { height: 100%; border-radius: 3px; }
+.pattern-wr { font-size: 12px; font-weight: 700; width: 40px; text-align: right; }
+.pattern-n { font-size: 11px; color: var(--muted); width: 30px; text-align: right; }
+
+/* Mega trades highlight */
+.mega-section { margin-bottom: 24px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab { padding: 8px 18px; cursor: pointer; font-size: 13px; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--blue); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main { padding: 12px; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .charts { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🐳 Whale Flow Analytics</h1>
+    <div class="sub">April 2026 · Unusual Whales · Options $500K+ Premium · Backtest Resolved</div>
+  </div>
+  <span class="badge">LIVE DATA</span>
+</div>
+
+<div class="main">
+
+  <!-- STAT CARDS -->
+  <div class="cards" id="stat-cards">
+    <div class="card"><div class="label">Total Resolved</div><div class="value blue" id="s-total">–</div><div class="sub">whale trades</div></div>
+    <div class="card"><div class="label">Win Rate</div><div class="value green" id="s-wr">–</div><div class="sub" id="s-wl">wins / losses</div></div>
+    <div class="card"><div class="label">Total Premium (Wins)</div><div class="value green" id="s-wprem">–</div><div class="sub">institutional $ correct</div></div>
+    <div class="card"><div class="label">Total Premium (Losses)</div><div class="value red" id="s-lprem">–</div><div class="sub">institutional $ wrong</div></div>
+    <div class="card"><div class="label">Avg Premium</div><div class="value yellow" id="s-avg">–</div><div class="sub">per whale trade</div></div>
+    <div class="card"><div class="label">Avg Move (Wins)</div><div class="value green" id="s-wmove">–</div><div class="sub">underlying move %</div></div>
+    <div class="card"><div class="label">Avg Move (Losses)</div><div class="value red" id="s-lmove">–</div><div class="sub">underlying move %</div></div>
+    <div class="card"><div class="label">$4M+ Trades</div><div class="value purple" id="s-mega">–</div><div class="sub" id="s-mega-wr">win rate</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview')">Overview</div>
+    <div class="tab" onclick="showTab('trades')">All Trades</div>
+    <div class="tab" onclick="showTab('mega')">$4M+ Mega Trades</div>
+    <div class="tab" onclick="showTab('patterns')">Pattern Analysis</div>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="charts">
+      <div class="chart-box"><h3>Win Rate by Alert Rule</h3><canvas id="c-rule"></canvas></div>
+      <div class="chart-box"><h3>Win Rate by Top Ticker</h3><canvas id="c-ticker"></canvas></div>
+      <div class="chart-box"><h3>Trades by Day (Wins vs Losses)</h3><canvas id="c-daily"></canvas></div>
+      <div class="chart-box"><h3>Win Rate by Sector</h3><canvas id="c-sector"></canvas></div>
+      <div class="chart-box"><h3>Premium Distribution</h3><canvas id="c-tier"></canvas></div>
+      <div class="chart-box"><h3>Win Rate by DTE Bucket</h3><canvas id="c-dte"></canvas></div>
+      <div class="chart-box"><h3>Win Rate by VIX Regime</h3><canvas id="c-vix"></canvas></div>
+      <div class="chart-box"><h3>Call vs Put Performance</h3><canvas id="c-type"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ALL TRADES TAB -->
+  <div class="tab-content" id="tab-trades">
+    <div class="filters">
+      <div class="filter-group"><label>Result</label>
+        <select id="f-result" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="win">Wins only</option>
+          <option value="lose">Losses only</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Ticker</label>
+        <select id="f-ticker" onchange="applyFilters()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group"><label>Rule</label>
+        <select id="f-rule" onchange="applyFilters()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group"><label>Sector</label>
+        <select id="f-sector" onchange="applyFilters()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group"><label>Type</label>
+        <select id="f-type" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="call">Call</option>
+          <option value="put">Put</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Min Premium ($M)</label>
+        <input type="number" id="f-minprem" placeholder="0" step="0.5" style="width:80px" onchange="applyFilters()">
+      </div>
+      <div class="filter-group"><label>Sweep</label>
+        <select id="f-sweep" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="1">Sweep only</option>
+          <option value="0">No sweep</option>
+        </select>
+      </div>
+      <button class="btn" onclick="resetFilters()">Reset</button>
+      <span id="filter-count" style="color:var(--muted);font-size:11px;margin-left:8px;"></span>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Resolved Whale Trades</h3>
+        <span class="count-badge" id="table-count">0 trades</span>
+      </div>
+      <div class="table-scroll" style="max-height:600px;overflow-y:auto;">
+        <table id="trades-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('d')">#</th>
+              <th onclick="sortTable('d')">Date In</th>
+              <th onclick="sortTable('ex')">Expiry</th>
+              <th onclick="sortTable('tk')">Ticker</th>
+              <th onclick="sortTable('tp')">Type</th>
+              <th onclick="sortTable('si')">Side</th>
+              <th onclick="sortTable('st')">Strike</th>
+              <th onclick="sortTable('en')">Entry</th>
+              <th onclick="sortTable('cl')">Close</th>
+              <th onclick="sortTable('mp')">Move%</th>
+              <th onclick="sortTable('ip')">ITM%</th>
+              <th onclick="sortTable('pr')">Premium</th>
+              <th onclick="sortTable('dt')">DTE</th>
+              <th onclick="sortTable('vx')">VIX</th>
+              <th>Sweep</th>
+              <th onclick="sortTable('ru')">Rule</th>
+              <th onclick="sortTable('se')">Sector</th>
+              <th onclick="sortTable('wi')">Result</th>
+            </tr>
+          </thead>
+          <tbody id="trades-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
+        <span class="page-info" id="page-info"></span>
+        <button class="page-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEGA TRADES TAB -->
+  <div class="tab-content" id="tab-mega">
+    <div class="cards" id="mega-cards" style="margin-bottom:20px;"></div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Trades with Premium &gt; $4 Million</h3>
+        <span class="count-badge" id="mega-count">0 trades</span>
+      </div>
+      <div class="table-scroll">
+        <table id="mega-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Date In</th><th>Expiry</th><th>Ticker</th><th>Type</th><th>Side</th>
+              <th>Strike</th><th>Entry</th><th>Close</th><th>Move%</th><th>ITM%</th>
+              <th>Premium</th><th>DTE</th><th>VIX</th><th>Sweep</th><th>Rule</th><th>Sector</th><th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="mega-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="charts" id="mega-charts">
+        <div class="chart-box"><h3>Mega Trades — By Ticker</h3><canvas id="mc-ticker"></canvas></div>
+        <div class="chart-box"><h3>Mega Trades — By Rule</h3><canvas id="mc-rule"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATTERNS TAB -->
+  <div class="tab-content" id="tab-patterns">
+    <div class="patterns-grid" id="patterns-grid"></div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────────
+const DATA_URL = 'data.json';
+let ALL_TRADES = [], ALL_PATTERNS = [];
+let filteredTrades = [], sortKey = 'd', sortDir = -1;
+let page = 1; const PAGE_SIZE = 100;
+
+// ── BOOT ────────────────────────────────────────────────────────────────────────
+async function boot() {
+  const res = await fetch(DATA_URL);
+  const data = await res.json();
+  ALL_TRADES = data.trades;
+  ALL_PATTERNS = data.patterns;
+  populateFilters();
+  filteredTrades = [...ALL_TRADES];
+  renderStats(ALL_TRADES);
+  buildCharts(ALL_TRADES);
+  renderTable();
+  renderMega();
+  renderPatterns();
+}
+
+// ── STATS ────────────────────────────────────────────────────────────────────────
+function renderStats(trades) {
+  const wins = trades.filter(t => t.wi);
+  const losses = trades.filter(t => !t.wi);
+  const T = trades.length, W = wins.length, L = losses.length;
+  const wprem = wins.reduce((s,t) => s+t.pr, 0);
+  const lprem = losses.reduce((s,t) => s+t.pr, 0);
+  const avg = trades.reduce((s,t) => s+t.pr, 0) / T;
+  const wmoves = wins.filter(t => t.mp != null).map(t => t.mp);
+  const lmoves = losses.filter(t => t.mp != null).map(t => t.mp);
+  const avgWM = wmoves.length ? wmoves.reduce((a,b)=>a+b,0)/wmoves.length : 0;
+  const avgLM = lmoves.length ? lmoves.reduce((a,b)=>a+b,0)/lmoves.length : 0;
+  const mega = trades.filter(t => t.pr > 4e6);
+  const megaW = mega.filter(t => t.wi).length;
+
+  document.getElementById('s-total').textContent = T.toLocaleString();
+  document.getElementById('s-wr').textContent = (W/T*100).toFixed(1) + '%';
+  document.getElementById('s-wl').textContent = `${W.toLocaleString()} wins / ${L.toLocaleString()} losses`;
+  document.getElementById('s-wprem').textContent = '$' + (wprem/1e6).toFixed(1) + 'M';
+  document.getElementById('s-lprem').textContent = '$' + (lprem/1e6).toFixed(1) + 'M';
+  document.getElementById('s-avg').textContent = '$' + (avg/1e3).toFixed(0) + 'K';
+  document.getElementById('s-wmove').textContent = (avgWM >= 0 ? '+' : '') + avgWM.toFixed(1) + '%';
+  document.getElementById('s-lmove').textContent = (avgLM >= 0 ? '+' : '') + avgLM.toFixed(1) + '%';
+  document.getElementById('s-mega').textContent = mega.length;
+  document.getElementById('s-mega-wr').textContent = mega.length ? (megaW/mega.length*100).toFixed(0)+'% win rate' : '';
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────────
+const C = {
+  green: '#3fb950', red: '#f85149', blue: '#58a6ff',
+  yellow: '#d29922', purple: '#bc8cff', orange: '#f0883e',
+  grid: '#21262d', text: '#8b949e', bg2: '#161b22'
+};
+
+function barOpts(horizontal = false) {
+  return {
+    indexAxis: horizontal ? 'y' : 'x',
+    responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: C.grid }, ticks: { color: C.text } },
+      y: { grid: { color: C.grid }, ticks: { color: C.text } }
+    }
+  };
+}
+
+function groupWinRate(trades, keyFn, minN = 3) {
+  const m = {};
+  for (const t of trades) {
+    const k = keyFn(t); if (!k) continue;
+    if (!m[k]) m[k] = { w: 0, l: 0 };
+    t.wi ? m[k].w++ : m[k].l++;
+  }
+  return Object.entries(m)
+    .filter(([, v]) => v.w + v.l >= minN)
+    .map(([k, v]) => ({ k, n: v.w+v.l, wr: v.w/(v.w+v.l)*100 }))
+    .sort((a, b) => b.wr - a.wr);
+}
+
+function makeBarChart(id, labels, data, colors, horizontal=false) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors || C.blue, borderRadius: 4, borderSkipped: false }] },
+    options: barOpts(horizontal)
+  });
+}
+
+function wrColor(wr) {
+  if (wr >= 65) return C.green;
+  if (wr >= 50) return C.yellow;
+  return C.red;
+}
+
+function buildCharts(trades) {
+  // Rule
+  const byRule = groupWinRate(trades, t => t.ru);
+  makeBarChart('c-rule', byRule.map(r=>r.k.replace('RepeatedHits','RH').replace('FloorTrade','FT').replace('LowHistoric','LH')),
+    byRule.map(r=>+r.wr.toFixed(1)), byRule.map(r=>wrColor(r.wr)), true);
+
+  // Ticker top 15 by count
+  const tkrMap = {};
+  for (const t of trades) {
+    if (!tkrMap[t.tk]) tkrMap[t.tk] = { w:0, l:0 };
+    t.wi ? tkrMap[t.tk].w++ : tkrMap[t.tk].l++;
+  }
+  const topTkr = Object.entries(tkrMap)
+    .map(([k,v]) => ({ k, n:v.w+v.l, wr: v.w/(v.w+v.l)*100 }))
+    .sort((a,b) => b.n - a.n).slice(0,15);
+  makeBarChart('c-ticker', topTkr.map(r=>r.k), topTkr.map(r=>+r.wr.toFixed(1)),
+    topTkr.map(r=>wrColor(r.wr)), true);
+
+  // Daily
+  const dayMap = {};
+  for (const t of trades) {
+    if (!dayMap[t.d]) dayMap[t.d] = { w:0, l:0 };
+    t.wi ? dayMap[t.d].w++ : dayMap[t.d].l++;
+  }
+  const days = Object.keys(dayMap).sort();
+  new Chart(document.getElementById('c-daily'), {
+    type: 'bar',
+    data: {
+      labels: days.map(d => d.slice(5)),
+      datasets: [
+        { label: 'Wins', data: days.map(d=>dayMap[d].w), backgroundColor: C.green+'99', borderRadius: 2 },
+        { label: 'Losses', data: days.map(d=>dayMap[d].l), backgroundColor: C.red+'99', borderRadius: 2 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:true, plugins:{legend:{labels:{color:C.text}}},
+      scales:{ x:{stacked:true,grid:{color:C.grid},ticks:{color:C.text,maxRotation:45}},
+                y:{stacked:true,grid:{color:C.grid},ticks:{color:C.text}} } }
+  });
+
+  // Sector
+  const bySector = groupWinRate(trades, t => t.se);
+  makeBarChart('c-sector', bySector.map(r=>r.k), bySector.map(r=>+r.wr.toFixed(1)),
+    bySector.map(r=>wrColor(r.wr)), true);
+
+  // Premium tier
+  const tierOrder = ['500K-1M','1M-5M','5M+'];
+  const tierMap = {};
+  for (const t of trades) {
+    const k = t.ti || 'Unknown';
+    if (!tierMap[k]) tierMap[k] = {w:0,l:0};
+    t.wi ? tierMap[k].w++ : tierMap[k].l++;
+  }
+  const tierLabels = tierOrder.filter(k => tierMap[k]);
+  new Chart(document.getElementById('c-tier'), {
+    type: 'doughnut',
+    data: {
+      labels: tierLabels,
+      datasets: [{
+        data: tierLabels.map(k => tierMap[k].w + tierMap[k].l),
+        backgroundColor: [C.blue, C.purple, C.yellow],
+        borderColor: C.bg2, borderWidth: 2
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{labels:{color:C.text}}} }
+  });
+
+  // DTE bucket
+  const dteOrder = ['weekly','monthly','2month','3month','leaps'];
+  const byDte = groupWinRate(trades, t => t.db, 1);
+  const dteFiltered = dteOrder.map(k => byDte.find(r=>r.k===k)).filter(Boolean);
+  makeBarChart('c-dte', dteFiltered.map(r=>r.k), dteFiltered.map(r=>+r.wr.toFixed(1)),
+    dteFiltered.map(r=>wrColor(r.wr)));
+
+  // VIX regime
+  const vixBucket = t => {
+    if (!t.vx) return null;
+    if (t.vx < 15) return 'low <15';
+    if (t.vx < 20) return 'normal 15-20';
+    if (t.vx < 30) return 'elevated 20-30';
+    return 'fear 30+';
+  };
+  const byVix = groupWinRate(trades, vixBucket, 1);
+  const vixOrder = ['low <15','normal 15-20','elevated 20-30','fear 30+'];
+  const vixF = vixOrder.map(k => byVix.find(r=>r.k===k)).filter(Boolean);
+  makeBarChart('c-vix', vixF.map(r=>r.k), vixF.map(r=>+r.wr.toFixed(1)), vixF.map(r=>wrColor(r.wr)));
+
+  // Call vs Put
+  const byType = groupWinRate(trades, t => t.tp, 1);
+  new Chart(document.getElementById('c-type'), {
+    type: 'doughnut',
+    data: {
+      labels: byType.map(r => `${r.k} ${r.wr.toFixed(0)}% (n=${r.n})`),
+      datasets: [{
+        data: byType.map(r => r.n),
+        backgroundColor: [C.green, C.red],
+        borderColor: C.bg2, borderWidth: 2
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{labels:{color:C.text}}} }
+  });
+}
+
+// ── FILTERS ────────────────────────────────────────────────────────────────────
+function populateFilters() {
+  const tickers = [...new Set(ALL_TRADES.map(t=>t.tk))].sort();
+  const rules = [...new Set(ALL_TRADES.map(t=>t.ru).filter(Boolean))].sort();
+  const sectors = [...new Set(ALL_TRADES.map(t=>t.se).filter(Boolean))].sort();
+
+  const fTicker = document.getElementById('f-ticker');
+  tickers.forEach(v => fTicker.innerHTML += `<option value="${v}">${v}</option>`);
+  const fRule = document.getElementById('f-rule');
+  rules.forEach(v => fRule.innerHTML += `<option value="${v}">${v}</option>`);
+  const fSector = document.getElementById('f-sector');
+  sectors.forEach(v => fSector.innerHTML += `<option value="${v}">${v}</option>`);
+}
+
+function applyFilters() {
+  const result = document.getElementById('f-result').value;
+  const ticker = document.getElementById('f-ticker').value;
+  const rule = document.getElementById('f-rule').value;
+  const sector = document.getElementById('f-sector').value;
+  const type = document.getElementById('f-type').value;
+  const minPrem = parseFloat(document.getElementById('f-minprem').value || 0) * 1e6;
+  const sweep = document.getElementById('f-sweep').value;
+
+  filteredTrades = ALL_TRADES.filter(t => {
+    if (result === 'win' && !t.wi) return false;
+    if (result === 'lose' && t.wi) return false;
+    if (ticker && t.tk !== ticker) return false;
+    if (rule && t.ru !== rule) return false;
+    if (sector && t.se !== sector) return false;
+    if (type && t.tp !== type) return false;
+    if (minPrem && t.pr < minPrem) return false;
+    if (sweep === '1' && !t.sw) return false;
+    if (sweep === '0' && t.sw) return false;
+    return true;
+  });
+  page = 1;
+  renderStats(filteredTrades.length ? filteredTrades : ALL_TRADES);
+  renderTable();
+  document.getElementById('filter-count').textContent =
+    filteredTrades.length < ALL_TRADES.length
+      ? `${filteredTrades.length.toLocaleString()} matching` : '';
+}
+
+function resetFilters() {
+  ['f-result','f-ticker','f-rule','f-sector','f-type','f-sweep'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-minprem').value = '';
+  filteredTrades = [...ALL_TRADES];
+  page = 1;
+  renderStats(ALL_TRADES);
+  renderTable();
+  document.getElementById('filter-count').textContent = '';
+}
+
+// ── TABLE ────────────────────────────────────────────────────────────────────────
+function sortTable(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = -1; }
+  filteredTrades.sort((a, b) => {
+    const va = a[key] ?? '', vb = b[key] ?? '';
+    return va < vb ? -sortDir : va > vb ? sortDir : 0;
+  });
+  page = 1;
+  renderTable();
+}
+
+function fmt(v, decimals=2) {
+  return v != null ? Number(v).toFixed(decimals) : '–';
+}
+function fmtPrem(v) {
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+  return '$' + (v/1e3).toFixed(0) + 'K';
+}
+function fmtMove(v) {
+  if (v == null) return '<span style="color:var(--muted)">–</span>';
+  const sign = v >= 0 ? '+' : '';
+  const cls = v >= 0 ? 'pos' : 'neg';
+  return `<span class="${cls}">${sign}${v.toFixed(1)}%</span>`;
+}
+
+function renderTable() {
+  const start = (page-1)*PAGE_SIZE, end = start+PAGE_SIZE;
+  const slice = filteredTrades.slice(start, end);
+  document.getElementById('table-count').textContent = filteredTrades.length.toLocaleString() + ' trades';
+  document.getElementById('page-info').textContent = `Page ${page} of ${Math.ceil(filteredTrades.length/PAGE_SIZE)}`;
+  document.getElementById('btn-prev').disabled = page <= 1;
+  document.getElementById('btn-next').disabled = end >= filteredTrades.length;
+
+  const tbody = document.getElementById('trades-body');
+  tbody.innerHTML = slice.map((t, i) => `
+    <tr class="${t.wi ? 'win-row' : 'lose-row'}">
+      <td style="color:var(--muted)">${start+i+1}</td>
+      <td>${t.d}</td>
+      <td>${t.ex || '–'}</td>
+      <td><strong>${t.tk}</strong></td>
+      <td><span class="tag ${t.tp==='call'?'tag-call':'tag-put'}">${t.tp}</span></td>
+      <td style="color:${t.si==='bull'?'var(--green)':'var(--red)'}">${t.si}</td>
+      <td>${fmt(t.st,1)}</td>
+      <td>${fmt(t.en,2)}</td>
+      <td>${fmt(t.cl,2)}</td>
+      <td>${fmtMove(t.mp)}</td>
+      <td>${fmtMove(t.ip)}</td>
+      <td style="font-weight:600">${fmtPrem(t.pr)}</td>
+      <td>${t.dt ?? '–'}</td>
+      <td>${t.vx ?? '–'}</td>
+      <td>${t.sw ? '<span class="tag tag-sweep">SWEEP</span>' : ''}</td>
+      <td style="color:var(--muted);font-size:11px">${t.ru || '–'}</td>
+      <td style="color:var(--muted);font-size:11px">${t.se || '–'}</td>
+      <td><span class="tag ${t.wi?'tag-win':'tag-lose'}">${t.wi?'WIN':'LOSE'}</span></td>
+    </tr>`).join('');
+}
+
+function changePage(dir) {
+  page += dir;
+  renderTable();
+  document.querySelector('.table-scroll').scrollTop = 0;
+}
+
+// ── MEGA TRADES ────────────────────────────────────────────────────────────────
+function renderMega() {
+  const mega = ALL_TRADES.filter(t => t.pr > 4e6).sort((a,b) => b.pr - a.pr);
+  const wins = mega.filter(t => t.wi), losses = mega.filter(t => !t.wi);
+  document.getElementById('mega-count').textContent = mega.length + ' trades';
+
+  // Stat cards for mega
+  const wprem = wins.reduce((s,t)=>s+t.pr,0);
+  const lprem = losses.reduce((s,t)=>s+t.pr,0);
+  document.getElementById('mega-cards').innerHTML = `
+    <div class="card"><div class="label">Mega Trades</div><div class="value purple">${mega.length}</div><div class="sub">premium >$4M</div></div>
+    <div class="card"><div class="label">Win Rate</div><div class="value green">${(wins.length/mega.length*100).toFixed(0)}%</div><div class="sub">${wins.length}W / ${losses.length}L</div></div>
+    <div class="card"><div class="label">$$ on Right Side</div><div class="value green">$${(wprem/1e6).toFixed(1)}M</div><div class="sub">wins total premium</div></div>
+    <div class="card"><div class="label">$$ on Wrong Side</div><div class="value red">$${(lprem/1e6).toFixed(1)}M</div><div class="sub">losses total premium</div></div>
+    <div class="card"><div class="label">Biggest Win</div><div class="value yellow">$${(Math.max(...wins.map(t=>t.pr))/1e6).toFixed(2)}M</div><div class="sub">${wins.sort((a,b)=>b.pr-a.pr)[0]?.tk}</div></div>
+  `;
+
+  document.getElementById('mega-body').innerHTML = mega.map((t,i) => `
+    <tr class="${t.wi?'win-row':'lose-row'}">
+      <td style="color:var(--muted)">${i+1}</td>
+      <td>${t.d}</td><td>${t.ex||'–'}</td>
+      <td><strong>${t.tk}</strong></td>
+      <td><span class="tag ${t.tp==='call'?'tag-call':'tag-put'}">${t.tp}</span></td>
+      <td style="color:${t.si==='bull'?'var(--green)':'var(--red)'}">${t.si}</td>
+      <td>${fmt(t.st,1)}</td><td>${fmt(t.en,2)}</td><td>${fmt(t.cl,2)}</td>
+      <td>${fmtMove(t.mp)}</td><td>${fmtMove(t.ip)}</td>
+      <td style="font-weight:700;color:var(--yellow)">$${(t.pr/1e6).toFixed(2)}M</td>
+      <td>${t.dt??'–'}</td><td>${t.vx??'–'}</td>
+      <td>${t.sw?'<span class="tag tag-sweep">SWEEP</span>':''}</td>
+      <td style="color:var(--muted);font-size:11px">${t.ru||'–'}</td>
+      <td style="color:var(--muted);font-size:11px">${t.se||'–'}</td>
+      <td><span class="tag ${t.wi?'tag-win':'tag-lose'}">${t.wi?'WIN':'LOSE'}</span></td>
+    </tr>`).join('');
+
+  // Mega charts
+  const tkrMap = {};
+  for (const t of mega) {
+    if (!tkrMap[t.tk]) tkrMap[t.tk] = {w:0,l:0};
+    t.wi ? tkrMap[t.tk].w++ : tkrMap[t.tk].l++;
+  }
+  const tkrData = Object.entries(tkrMap).sort((a,b)=>(b[1].w+b[1].l)-(a[1].w+a[1].l));
+  new Chart(document.getElementById('mc-ticker'), {
+    type: 'bar',
+    data: {
+      labels: tkrData.map(([k])=>k),
+      datasets: [
+        { label:'Wins', data: tkrData.map(([,v])=>v.w), backgroundColor:C.green+'99', borderRadius:3 },
+        { label:'Losses', data: tkrData.map(([,v])=>v.l), backgroundColor:C.red+'99', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, plugins:{legend:{labels:{color:C.text}}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.text}},y:{grid:{color:C.grid},ticks:{color:C.text}}} }
+  });
+
+  const ruleMap = {};
+  for (const t of mega) {
+    const k = t.ru||'Unknown';
+    if (!ruleMap[k]) ruleMap[k] = {w:0,l:0};
+    t.wi ? ruleMap[k].w++ : ruleMap[k].l++;
+  }
+  const ruleData = Object.entries(ruleMap).sort((a,b)=>(b[1].w+b[1].l)-(a[1].w+a[1].l));
+  new Chart(document.getElementById('mc-rule'), {
+    type: 'bar',
+    data: {
+      labels: ruleData.map(([k])=>k.replace('RepeatedHits','RH')),
+      datasets: [
+        { label:'Wins', data: ruleData.map(([,v])=>v.w), backgroundColor:C.green+'99', borderRadius:3 },
+        { label:'Losses', data: ruleData.map(([,v])=>v.l), backgroundColor:C.red+'99', borderRadius:3 }
+      ]
+    },
+    options: { responsive:true, indexAxis:'y', plugins:{legend:{labels:{color:C.text}}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.text}},y:{grid:{color:C.grid},ticks:{color:C.text}}} }
+  });
+}
+
+// ── PATTERNS ────────────────────────────────────────────────────────────────────
+function renderPatterns() {
+  const dims = [...new Set(ALL_PATTERNS.map(p=>p.dimension))].sort();
+  const grid = document.getElementById('patterns-grid');
+  for (const dim of dims) {
+    const rows = ALL_PATTERNS.filter(p=>p.dimension===dim).sort((a,b)=>b.win_rate-a.win_rate);
+    if (!rows.length) continue;
+    const card = document.createElement('div');
+    card.className = 'pattern-card';
+    card.innerHTML = `<h4>${dim}</h4>` + rows.map(p => {
+      const wr = (p.win_rate*100).toFixed(0);
+      const color = +wr >= 65 ? C.green : +wr >= 50 ? C.yellow : C.red;
+      return `<div class="pattern-row">
+        <div class="pattern-val">${p.dimension_value}</div>
+        <div class="pattern-bar-wrap"><div class="pattern-bar" style="width:${wr}%;background:${color}"></div></div>
+        <div class="pattern-wr" style="color:${color}">${wr}%</div>
+        <div class="pattern-n">n=${p.total_trades}</div>
+      </div>`;
+    }).join('');
+    grid.appendChild(card);
+  }
+}
+
+// ── TABS ────────────────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['overview','trades','mega','patterns'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+boot();
+</script>
+</body>
+</html>
